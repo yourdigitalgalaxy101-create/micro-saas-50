@@ -1,248 +1,174 @@
-<!DOCTYPE html><html lang="en" class="dark">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>App 01: Pulse Survey Engine</title>
+  <title>The Dofollow Kingmaker | Outbid for the #1 Link</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: { 500: '#6366f1', 600: '#4f46e5' }
-          }
-        }
-      }
-    }
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
-  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>  <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-2xl shadow-indigo-950/20">
-    <div class="mb-6">
-      <h1 class="text-xl font-bold text-slate-50 tracking-tight">Product Feedback Pulse</h1>
-      <p class="text-sm text-slate-400 mt-1">How likely are you to recommend our operational tooling?</p>
-    </div><form id="survey-form" class="space-y-5">
-
-  <div>
-
-    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Score Rating (1 - 10)</label>
-
-    <div class="grid grid-cols-5 gap-2" id="rating-buttons">
-
-      <!-- Rendered via JS -->
-
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <nav class="border-b border-slate-800 bg-slate-900/60 backdrop-blur sticky top-0 z-40 px-6 py-4 flex justify-between items-center max-w-6xl mx-auto">
+    <div class="flex items-center gap-2">
+      <span class="text-2xl">👑</span>
+      <span class="font-black text-xl tracking-tight bg-gradient-to-r from-amber-400 to-yellow-200 bg-clip-text text-transparent">Dofollow Kingmaker</span>
     </div>
+    <span class="text-xs font-bold px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Live Monetized Board</span>
+  </nav>
 
-    <input type="hidden" name="score" id="selected-score" required>
+  <main class="max-w-5xl mx-auto px-6 py-12">
+    <header class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-black text-white tracking-tight mb-4">Command The #1 Sovereign Dofollow Backlink</h1>
+      <p class="text-slate-400 text-base md:text-lg max-w-2xl mx-auto">Outbid the reigning champion to command the apex dofollow link slot. Immediate global ranking exposure powered by live escrow verification.</p>
+    </header>
 
-  </div>
+    <div class="grid md:grid-cols-3 gap-8">
+      <section class="md:col-span-1 bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl h-fit">
+        <h2 class="text-lg font-bold text-white mb-4">Submit Competitor Bid</h2>
+        <form id="bidForm" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Company / Project Name</label>
+            <input type="text" id="bidTitle" required placeholder="e.g. Acme AI" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-amber-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Target Website URL</label>
+            <input type="url" id="bidUrl" required placeholder="https://domain.com" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-amber-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Anchor Text / Pitch Tagline</label>
+            <input type="text" id="bidContent" required placeholder="Fastest vector search engine" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-amber-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Bid Value (INR ₹)</label>
+            <input type="number" id="bidAmount" min="10" step="10" required value="499" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-amber-400">
+          </div>
+          <button type="submit" id="bidBtn" class="w-full py-3 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-bold rounded-xl transition text-sm shadow-lg shadow-amber-500/20">Proceed to Escrow Bid</button>
+        </form>
+      </section>
 
-  <div>
-
-    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Category</label>
-
-    <select name="category" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
-
-      <option value="Product Performance">Product Performance</option>
-
-      <option value="Customer Support">Customer Support</option>
-
-      <option value="Feature Completeness">Feature Completeness</option>
-
-      <option value="Pricing Value">Pricing Value</option>
-
-    </select>
-
-  </div>
-
-  <div>
-
-    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Notes</label>
-
-    <textarea name="comment" rows="3" placeholder="Provide contextual feedback..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-sm text-slate-200 focus:outline-none focus:border-brand-500"></textarea>
-
-  </div>
-
-  <button type="submit" id="submit-btn" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 transition-colors rounded-lg font-medium text-sm text-white shadow-lg shadow-brand-500/20 active:scale-[0.98]">
-
-    Submit Feedback
-
-  </button>
-
-</form>
-
-<div class="mt-8 border-t border-slate-800 pt-4">
-
-  <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Live Feed</h2>
-
-  <div id="survey-feed" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
-
-</div>
-
-  </div>  <script>
-    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOi...';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const APP_ID = 'app-01';
-
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-toast.className = `px-4 py-2.5 rounded-lg text-xs font-medium border shadow-lg transition-all duration-300 transform translate-y-0 opacity-100 ${
-type === 'error' ? 'bg-rose-950 border-rose-800 text-rose-200' : 'bg-slate-800 border-slate-700 text-slate-200'
-}`;
-toast.innerText = message;
-container.appendChild(toast);
-setTimeout(() => {
-toast.classList.add('opacity-0', '-translate-y-2');
-setTimeout(() => toast.remove(), 300);
-}, 3500);
-}const ratingsContainer = document.getElementById('rating-buttons');
-
-for (let i = 1; i <= 10; i++) {
-
-  const btn = document.createElement('button');
-
-  btn.type = 'button';
-
-  btn.className = 'py-2 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-300 transition-colors focus:ring-1 focus:ring-brand-500';
-
-  btn.innerText = i;
-
-  btn.onclick = () => {
-
-    document.querySelectorAll('#rating-buttons button').forEach(b => b.classList.remove('bg-brand-600', 'border-brand-500', 'text-white'));
-
-    btn.classList.add('bg-brand-600', 'border-brand-500', 'text-white');
-
-    document.getElementById('selected-score').value = i;
-
-  };
-
-  ratingsContainer.appendChild(btn);
-
-}
-
-function appendSubmissionCard(payload) {
-
-  const feed = document.getElementById('survey-feed');
-
-  const item = document.createElement('div');
-
-  item.className = 'bg-slate-800/60 border border-slate-800 rounded p-2.5 text-xs flex justify-between items-center';
-
-  item.innerHTML = `
-
-    <div>
-
-      <span class="font-bold text-slate-200">${payload.category || 'General'}</span>
-
-      <p class="text-slate-400 truncate max-w-[200px]">${payload.comment || 'No comment added'}</p>
-
+      <section class="md:col-span-2 space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <h2 class="text-lg font-bold text-white">Active Crown & Directory Ranking</h2>
+          <span id="rankCount" class="text-xs text-slate-400 font-mono">0 verified entries</span>
+        </div>
+        <div id="leaderboardList" class="space-y-3">
+          <div class="p-8 text-center text-slate-500 bg-slate-900/40 rounded-xl border border-slate-800">Connecting to live real-time index...</div>
+        </div>
+      </section>
     </div>
+  </main>
 
-    <span class="px-2 py-1 bg-brand-600/20 text-brand-400 font-mono font-bold rounded">${payload.score}/10</span>
+  <div id="escrowModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-md w-full space-y-4 text-center">
+      <div class="w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center mx-auto text-xl">💳</div>
+      <h3 class="text-lg font-bold text-white">Authorize Sovereign Bid</h3>
+      <p class="text-xs text-slate-400">Submit your contribution through our verified Razorpay gateway, then confirm your reference below to anchor your backlink instantly.</p>
+      <a id="payLinkBtn" href="https://razorpay.me/@shambhavigoutam" target="_blank" class="block w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-sm transition">1. Complete Payment via Razorpay ↗</a>
+      <div class="pt-2 border-t border-slate-800 text-left">
+        <label class="block text-xs font-semibold text-slate-400 mb-1">Razorpay Payment ID / Reference</label>
+        <input type="text" id="escrowRef" placeholder="e.g. pay_Q2k8..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-white mb-3 focus:outline-none focus:border-amber-400">
+        <div class="flex gap-2">
+          <button type="button" onclick="document.getElementById('escrowModal').classList.add('hidden')" class="w-1/2 py-2 text-xs text-slate-400 hover:text-white">Cancel</button>
+          <button type="button" id="confirmEscrowBtn" class="w-1/2 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold rounded-lg text-xs transition">2. Verify & Crown</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  `;
+  <script>
+    const PROJECT_REF = "tehbbiwwcwvxcpuwwvrv";
+    const SUPABASE_URL = "https://" + PROJECT_REF + ".supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRlaGJiaXd3Y3d2eGNwdXd3dnJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzNzM4MTcsImV4cCI6MjEwODk0OTgxN30.Dk1VJDsg55HlfliIMbnaPHzrr6--I9exUXpAYPj2poc";
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  feed.prepend(item);
+    let pendingPayload = null;
 
-}
+    async function fetchRanks() {
+      const { data, error } = await sb.from('public_submissions')
+        .select('*')
+        .eq('app_slug', 'dofollow-king')
+        .order('metric_value', { ascending: false });
 
-async function loadInitialSubmissions() {
+      if (error) {
+        console.error("Supabase sync error:", error);
+        return;
+      }
+      render(data || []);
+    }
 
-  const { data, error } = await supabaseClient
+    function render(items) {
+      const list = document.getElementById('leaderboardList');
+      document.getElementById('rankCount').textContent = items.length + " verified entries";
+      if (!items.length) {
+        list.innerHTML = '<div class="p-8 text-center text-slate-500 bg-slate-900/40 rounded-xl border border-slate-800">No king crowned yet. Be the first to claim the apex slot!</div>';
+        return;
+      }
 
-    .from('public_submissions')
+      list.innerHTML = items.map((item, idx) => `
+        <div class="p-4 rounded-xl border ${idx === 0 ? 'bg-amber-950/20 border-amber-500/40 shadow-lg shadow-amber-500/5' : 'bg-slate-900/60 border-slate-800'} flex items-center justify-between transition hover:border-slate-700">
+          <div class="flex items-center gap-4">
+            <span class="w-8 h-8 rounded-full flex items-center justify-center font-black text-sm ${idx === 0 ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-400'}">${idx + 1}</span>
+            <div>
+              <a href="${item.target_url}" target="_blank" rel="dofollow" class="font-bold text-white hover:text-amber-400 transition flex items-center gap-1.5">
+                ${item.title} <span class="text-xs text-slate-400">🔗</span>
+              </a>
+              <p class="text-xs text-slate-400 mt-0.5">${item.input_content}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-sm font-bold text-emerald-400">₹${Number(item.metric_value).toFixed(2)}</span>
+            <span class="block text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Bid Power</span>
+          </div>
+        </div>
+      `).join('');
+    }
 
-    .select('*')
+    document.getElementById('bidForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      pendingPayload = {
+        app_slug: 'dofollow-king',
+        title: document.getElementById('bidTitle').value.trim(),
+        target_url: document.getElementById('bidUrl').value.trim(),
+        input_content: document.getElementById('bidContent').value.trim(),
+        metric_value: parseFloat(document.getElementById('bidAmount').value)
+      };
+      document.getElementById('escrowModal').classList.remove('hidden');
+    });
 
-    .eq('app_id', APP_ID)
+    document.getElementById('confirmEscrowBtn').addEventListener('click', async () => {
+      const ref = document.getElementById('escrowRef').value.trim();
+      if (!ref) {
+        alert("Please enter your transaction ID or payment reference to finalize.");
+        return;
+      }
+      const btn = document.getElementById('confirmEscrowBtn');
+      btn.disabled = true;
+      btn.textContent = "Anchoring...";
 
-    .order('created_at', { ascending: false })
+      pendingPayload.input_content = pendingPayload.input_content + " (Ref: " + ref + ")";
+      const { error } = await sb.from('public_submissions').insert([pendingPayload]);
+      btn.disabled = false;
+      btn.textContent = "2. Verify & Crown";
 
-    .limit(5);
+      if (error) {
+        alert("Verification error: " + error.message);
+      } else {
+        document.getElementById('escrowModal').classList.add('hidden');
+        document.getElementById('bidForm').reset();
+        document.getElementById('escrowRef').value = "";
+        fetchRanks();
+      }
+    });
 
-  if (error) {
+    sb.channel('realtime_dofollow')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'public_submissions', filter: 'app_slug=eq.dofollow-king' }, () => {
+        fetchRanks();
+      })
+      .subscribe();
 
-    showToast('Sync error loading history', 'error');
-
-    return;
-
-  }
-
-  data.reverse().forEach(row => appendSubmissionCard(row.payload));
-
-}
-
-document.getElementById('survey-form').addEventListener('submit', async (e) => {
-
-  e.preventDefault();
-
-  const formData = new FormData(e.target);
-
-  const score = formData.get('score');
-
-  if (!score) {
-
-    showToast('Please select a score rating', 'error');
-
-    return;
-
-  }
-
-  const payload = {
-
-    score: parseInt(score),
-
-    category: formData.get('category'),
-
-    comment: formData.get('comment'),
-
-    timestamp: new Date().toISOString()
-
-  };
-
-  appendSubmissionCard(payload);
-
-  showToast('Rating recorded locally');
-
-  const { error } = await supabaseClient
-
-    .from('public_submissions')
-
-    .insert([{ app_id: APP_ID, payload }]);
-
-  if (error) {
-
-    showToast('Sync error: ' + error.message, 'error');
-
-  } else {
-
-    e.target.reset();
-
-    document.querySelectorAll('#rating-buttons button').forEach(b => b.classList.remove('bg-brand-600', 'border-brand-500', 'text-white'));
-
-  }
-
-});
-
-supabaseClient
-
-  .channel('public_submissions_app_01')
-
-  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'public_submissions', filter: `app_id=eq.${APP_ID}` }, payload => {
-
-    appendSubmissionCard(payload.new.payload);
-
-  })
-
-  .subscribe();
-
-loadInitialSubmissions()
-;
+    fetchRanks();
+  </script>
 </body>
 </html>
-
