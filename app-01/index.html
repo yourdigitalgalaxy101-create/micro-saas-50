@@ -1,0 +1,248 @@
+<!DOCTYPE html><html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App 01: Pulse Survey Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#6366f1', 600: '#4f46e5' }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>  <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-2xl shadow-indigo-950/20">
+    <div class="mb-6">
+      <h1 class="text-xl font-bold text-slate-50 tracking-tight">Product Feedback Pulse</h1>
+      <p class="text-sm text-slate-400 mt-1">How likely are you to recommend our operational tooling?</p>
+    </div><form id="survey-form" class="space-y-5">
+
+  <div>
+
+    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Score Rating (1 - 10)</label>
+
+    <div class="grid grid-cols-5 gap-2" id="rating-buttons">
+
+      <!-- Rendered via JS -->
+
+    </div>
+
+    <input type="hidden" name="score" id="selected-score" required>
+
+  </div>
+
+  <div>
+
+    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Category</label>
+
+    <select name="category" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
+
+      <option value="Product Performance">Product Performance</option>
+
+      <option value="Customer Support">Customer Support</option>
+
+      <option value="Feature Completeness">Feature Completeness</option>
+
+      <option value="Pricing Value">Pricing Value</option>
+
+    </select>
+
+  </div>
+
+  <div>
+
+    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Notes</label>
+
+    <textarea name="comment" rows="3" placeholder="Provide contextual feedback..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-sm text-slate-200 focus:outline-none focus:border-brand-500"></textarea>
+
+  </div>
+
+  <button type="submit" id="submit-btn" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 transition-colors rounded-lg font-medium text-sm text-white shadow-lg shadow-brand-500/20 active:scale-[0.98]">
+
+    Submit Feedback
+
+  </button>
+
+</form>
+
+<div class="mt-8 border-t border-slate-800 pt-4">
+
+  <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Live Feed</h2>
+
+  <div id="survey-feed" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
+
+</div>
+
+  </div>  <script>
+    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOi...';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const APP_ID = 'app-01';
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+toast.className = `px-4 py-2.5 rounded-lg text-xs font-medium border shadow-lg transition-all duration-300 transform translate-y-0 opacity-100 ${
+type === 'error' ? 'bg-rose-950 border-rose-800 text-rose-200' : 'bg-slate-800 border-slate-700 text-slate-200'
+}`;
+toast.innerText = message;
+container.appendChild(toast);
+setTimeout(() => {
+toast.classList.add('opacity-0', '-translate-y-2');
+setTimeout(() => toast.remove(), 300);
+}, 3500);
+}const ratingsContainer = document.getElementById('rating-buttons');
+
+for (let i = 1; i <= 10; i++) {
+
+  const btn = document.createElement('button');
+
+  btn.type = 'button';
+
+  btn.className = 'py-2 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-300 transition-colors focus:ring-1 focus:ring-brand-500';
+
+  btn.innerText = i;
+
+  btn.onclick = () => {
+
+    document.querySelectorAll('#rating-buttons button').forEach(b => b.classList.remove('bg-brand-600', 'border-brand-500', 'text-white'));
+
+    btn.classList.add('bg-brand-600', 'border-brand-500', 'text-white');
+
+    document.getElementById('selected-score').value = i;
+
+  };
+
+  ratingsContainer.appendChild(btn);
+
+}
+
+function appendSubmissionCard(payload) {
+
+  const feed = document.getElementById('survey-feed');
+
+  const item = document.createElement('div');
+
+  item.className = 'bg-slate-800/60 border border-slate-800 rounded p-2.5 text-xs flex justify-between items-center';
+
+  item.innerHTML = `
+
+    <div>
+
+      <span class="font-bold text-slate-200">${payload.category || 'General'}</span>
+
+      <p class="text-slate-400 truncate max-w-[200px]">${payload.comment || 'No comment added'}</p>
+
+    </div>
+
+    <span class="px-2 py-1 bg-brand-600/20 text-brand-400 font-mono font-bold rounded">${payload.score}/10</span>
+
+  `;
+
+  feed.prepend(item);
+
+}
+
+async function loadInitialSubmissions() {
+
+  const { data, error } = await supabaseClient
+
+    .from('public_submissions')
+
+    .select('*')
+
+    .eq('app_id', APP_ID)
+
+    .order('created_at', { ascending: false })
+
+    .limit(5);
+
+  if (error) {
+
+    showToast('Sync error loading history', 'error');
+
+    return;
+
+  }
+
+  data.reverse().forEach(row => appendSubmissionCard(row.payload));
+
+}
+
+document.getElementById('survey-form').addEventListener('submit', async (e) => {
+
+  e.preventDefault();
+
+  const formData = new FormData(e.target);
+
+  const score = formData.get('score');
+
+  if (!score) {
+
+    showToast('Please select a score rating', 'error');
+
+    return;
+
+  }
+
+  const payload = {
+
+    score: parseInt(score),
+
+    category: formData.get('category'),
+
+    comment: formData.get('comment'),
+
+    timestamp: new Date().toISOString()
+
+  };
+
+  appendSubmissionCard(payload);
+
+  showToast('Rating recorded locally');
+
+  const { error } = await supabaseClient
+
+    .from('public_submissions')
+
+    .insert([{ app_id: APP_ID, payload }]);
+
+  if (error) {
+
+    showToast('Sync error: ' + error.message, 'error');
+
+  } else {
+
+    e.target.reset();
+
+    document.querySelectorAll('#rating-buttons button').forEach(b => b.classList.remove('bg-brand-600', 'border-brand-500', 'text-white'));
+
+  }
+
+});
+
+supabaseClient
+
+  .channel('public_submissions_app_01')
+
+  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'public_submissions', filter: `app_id=eq.${APP_ID}` }, payload => {
+
+    appendSubmissionCard(payload.new.payload);
+
+  })
+
+  .subscribe();
+
+loadInitialSubmissions()
+;
+</body>
+</html>
+
